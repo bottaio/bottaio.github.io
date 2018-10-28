@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Adrian Bednarz's Blog]]></title><description><![CDATA[Adrian Bednarz's Blog]]></description><link>https://bednarzadrian.com</link><generator>RSS for Node</generator><lastBuildDate>Fri, 21 Dec 2018 22:50:39 GMT</lastBuildDate><item><title><![CDATA[[Big Data] Streaming platforms]]></title><description><![CDATA[Old fashioned batch architectures are not enough these days. With data comming from various sources - sockets, REST APIs, clickstream from…]]></description><link>https://bednarzadrian.com/streaming-platforms/</link><guid isPermaLink="false">https://bednarzadrian.com/streaming-platforms/</guid><pubDate>Fri, 21 Dec 2018 23:45:00 GMT</pubDate><content:encoded>&lt;p&gt;Old fashioned batch architectures are not enough these days. With data comming from various sources - sockets, REST APIs, clickstream from the websites and logs it might no longer be feasible to just rely on batch jobs running every now and then - they might be just too slow. People tend to be moving towards more stream-oriented architectures.&lt;/p&gt;
+&lt;p&gt;It’s not that we should get rid of the batch jobs altogether. ETL and other data warehouse feeding tasks are fields where these kind of jobs shine. We should no longer just save the data on ingestion in our systems. Apart from writing data to S3 or HDFS we would usually store it on a Kafka topic.&lt;/p&gt;
+&lt;p&gt;Moreover, with Apache Kafka as a data distribution layer we can easily fix problems with some part of the system being temporarily unavailable. &lt;/p&gt;
+&lt;h2&gt;Flink, Spark or…?&lt;/h2&gt;
+&lt;p&gt;Let’s briefly walk through most famous Scala-oriented streaming platforms actively used in the industry.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Apache Flink - fully stream architecture, deals with massive datasets with really low latency. Drawback: no batch support. They recently added SQL support.&lt;/li&gt;
+&lt;li&gt;Apache Spark - most popular framework these days, formerly batch / mini-batch oriented - now with structured streaming it is supporting fully streaming jobs too. With great integrations: e. g. Tensorflow. It also supports SQL. &lt;/li&gt;
+&lt;li&gt;Akka Streams - Akka allows for more low-level access to stream processing. Previously mentioned frameworks require programmer to build a job definition that later gets distributed across the cluster with little control. Akka Streams is a Scala library - you get more control and lower latency. But it is harder to optimize to process really massive datasets as Spark or Flink are capable of processing. Alpaka project can be used for integrations with other systems (databases, Kafka, queues etc.),&lt;/li&gt;
+&lt;li&gt;Kafka Streams - similarly to Akka Streams its just a library. Sometimes we are just interested in transforming one Kafka topic to another - that is to read from some topics and to write to the others. This library is developed to help you with exactly that. It also supports SQL on topics.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;Why SQL?&lt;/h2&gt;
+&lt;p&gt;I mentioned SQL support - it is really important for analysts to have a way of defining transformation without Scala knowledge - as they might not necessarily know Scala well. An example of a project that addressed this problem back in 2010 is Apache Hive. There are other tools developed to help address this problem too - one of those is TouK Nussknacker - an Apache Flink GUI.&lt;/p&gt;
+&lt;h2&gt;Industry still changes…&lt;/h2&gt;
+&lt;p&gt;The project also worth mentioning is Apache Beam. It’s goal is to define data processing streams - apart from transformation it specifies how data delays should be addressed (commonly known as ingestion time vs event time). It was developed by Google and will probably be the next big thing (just as MapReduce became standard after all…).&lt;/p&gt;
+&lt;p&gt;There are more technologies involved. Of course Zookeeper is required by the Kafka and it allows us to keep state around the cluster. Kubernetes or Mesos are next-generation cluster managers (that may soon deprecate YARN). With great power comes great responsibility - and a lot to learn.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[[R] Flatten list of data frames with do.call]]></title><description><![CDATA[Problem statement Having list of data frames with the same column names we would like to flatten (bind) them into a single data frame. Tip…]]></description><link>https://bednarzadrian.com/do-call/</link><guid isPermaLink="false">https://bednarzadrian.com/do-call/</guid><pubDate>Wed, 31 Oct 2018 19:00:00 GMT</pubDate><content:encoded>&lt;h2&gt;Problem statement&lt;/h2&gt;
+&lt;p&gt;Having list of data frames with the same column names we would like to flatten (bind) them into a single data frame.&lt;/p&gt;
+&lt;h2&gt;Tip: do.call&lt;/h2&gt;
+&lt;p&gt;&lt;code class=&quot;language-text&quot;&gt;do.call&lt;/code&gt; is a R &lt;code class=&quot;language-text&quot;&gt;built-in&lt;/code&gt; function that takes two arguments:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;name&lt;/strong&gt; of a function to call,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;list&lt;/strong&gt; of parameters that are to be passed into a function (one by one).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Final call: &lt;code class=&quot;language-text&quot;&gt;do.call(&amp;quot;name&amp;quot;, list)&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;Example&lt;/h3&gt;
+&lt;p&gt;If you want to combine arbitrary number of vectors into a single vector you could do:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;do.call(&amp;quot;c&amp;quot;, list(c(1, 2), c(3, 4), ...))&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Solution&lt;/h2&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;f    == &amp;quot;rbind&amp;quot;
+list == our list of data frames
+q.e.d
+
+do.call(&amp;quot;rbind&amp;quot;, list)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Sample code&lt;/h2&gt;
+&lt;p&gt;Following example subtracts mean from each row of data frame.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;means &amp;lt;- sapply(df, mean)
+df_list &amp;lt;- lapply(df, 1, function(x) x - means)
+
+do.call(&amp;quot;rbind&amp;quot;, df_list)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content:encoded></item></channel></rss>
